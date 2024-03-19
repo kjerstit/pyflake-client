@@ -113,7 +113,7 @@ def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.Li
     grant = GrantAction(
         db_role,
         SchemaGrant(database_name=database.db_name, schema_name=schema.schema_name),
-        [Privilege.USAGE, Privilege.CREATE_TABLE],
+        [Privilege.USAGE, Privilege.CREATE_TABLE, Privilege.CREATE_MODEL, Privilege.CREATE_SF_ML_ANOMALY_DETECTION],
     )
 
     try:
@@ -132,7 +132,7 @@ def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.Li
 
         ### Assert ###
         assert grants is not None
-        assert len(grants) == 3
+        assert len(grants) == 5
 
         usg = next((r for r in grants if r.privilege == Privilege.USAGE and r.granted_on == "DATABASE"), None)
         assert usg is not None
@@ -155,6 +155,26 @@ def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.Li
         assert ct.grantee_type == "DATABASE_ROLE"
         assert ct.granted_identifier == f"{database.db_name}.{schema.schema_name}"
 
+        cm = next((r for r in grants if r.privilege == Privilege.CREATE_MODEL and r.granted_on == "SCHEMA"), None)
+        assert ct is not None
+        assert ct.granted_by == "SYSADMIN"
+        assert ct.grantee_identifier == db_role.name
+        assert ct.grantee_type == "DATABASE_ROLE"
+        assert ct.granted_identifier == f"{database.db_name}.{schema.schema_name}"
+
+        cm = next(
+            (
+                r
+                for r in grants
+                if r.privilege == Privilege.CREATE_SF_ML_ANOMALY_DETECTION and r.granted_on == "SCHEMA"
+            ),
+            None,
+        )
+        assert ct is not None
+        assert ct.granted_by == "SYSADMIN"
+        assert ct.grantee_identifier == db_role.name
+        assert ct.grantee_type == "DATABASE_ROLE"
+        assert ct.granted_identifier == f"{database.db_name}.{schema.schema_name}"
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
