@@ -26,6 +26,8 @@ class Procedure(ISnowflakeExecutable):
                 proc_args += f"{int(arg.value)},"
             elif arg.data_type == ColumnType.BOOLEAN:
                 proc_args += f"{bool(arg.value)},"
+            elif arg.data_type == ColumnType.VARIANT:
+                proc_args += f"{arg.value},"
             else:
                 raise ValueError(f"ColumnType ${arg.data_type} is not mapped")
         return f"call {self.database_name}.{self.schema_name}.{self.procedure_name}({proc_args.rstrip(',')});"
