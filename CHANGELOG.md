@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.1](https://github.com/kjerstit/pyflake-client/compare/v0.12.0...v0.12.1) (2024-06-19)
+
+
+### Bug Fixes
+
+* add variant type to procedures ([0b5c963](https://github.com/kjerstit/pyflake-client/commit/0b5c9637df20e468622bb92b0ab1e072994e6859))
+* upgrade snowflake packages ([df8f8ce](https://github.com/kjerstit/pyflake-client/commit/df8f8ce683529a9c2bfe1b36840a527c0df26180))
+
 ## [0.12.0](https://github.com/kjerstit/pyflake-client/compare/v0.11.0...v0.12.0) (2024-03-19)
 
 
