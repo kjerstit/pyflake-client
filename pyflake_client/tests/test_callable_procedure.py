@@ -138,3 +138,46 @@ def test_call_procedure_multiple_args_string_scalar_return(
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
+
+def test_call_procedure_list_input(
+    flake: PyflakeClient,
+    proc_db: Tuple[Database, Schema, DatabaseRole, DatabaseRole, DatabaseRole],
+    assets_queue: queue.LifoQueue
+):
+    db, s, _, _, _ = proc_db
+    proc_name = f"TEST_PROC_{secrets.token_hex(5)}".upper()
+    sql: str = f"""
+    CREATE OR REPLACE PROCEDURE {db.db_name}.{s.schema_name}.{proc_name}(var VARIANT)
+        RETURNS VARCHAR(16777216)
+        LANGUAGE SQL
+        EXECUTE AS CALLER
+    AS $$
+        BEGIN
+            RETURN var[0];
+        END
+    $$;
+    """
+    
+    proc: ProcedureAsset = ProcedureAsset(
+        db.db_name, s.schema_name, proc_name, [ColumnType.VARIANT], sql
+    )
+    proc_exec = ProcedureExec(
+        db.db_name,
+        s.schema_name,
+        proc_name,
+        [
+            ProcedureArg(1, ColumnType.VARIANT, ["first element", "second element", "third element"]),
+        ],
+    )
+
+    try:
+        flake.register_asset_async(proc, assets_queue).wait()
+
+        ### Act ###
+        res = flake.execute_async(proc_exec.get_call_statement()).fetch_one(str, lambda x: x)
+        ### Assert ###
+        assert res == "\"first element\""
+
+    finally:
+        ### Cleanup ###
+        flake.delete_assets(assets_queue)

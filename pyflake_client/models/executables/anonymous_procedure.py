@@ -22,6 +22,10 @@ class AnonymousProcedure(ISnowflakeExecutable):
                 proc_args += f"'{str(arg.value)}',"
             elif arg.data_type == ColumnType.INTEGER:
                 proc_args += f"{int(arg.value)},"
+            elif arg.data_type == ColumnType.BOOLEAN:
+                proc_args += f"{bool(arg.value)},"
+            elif arg.data_type == ColumnType.VARIANT:
+                proc_args += f"{arg.value},"
             else:
                 raise ValueError(f"ColumnType ${arg.data_type} is not mapped")
         test = f"{self.procedure_definition}\ncall {self.procedure_name}({proc_args.rstrip(',')});"

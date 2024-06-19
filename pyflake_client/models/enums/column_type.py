@@ -13,3 +13,4 @@ class ColumnType(str, Enum):
     ARRAY = "ARRAY"
     OBJECT = "OBJECT"
     VARIANT = "VARIANT"
+    LIST = "VARIANT"
