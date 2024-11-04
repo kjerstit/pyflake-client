@@ -35,7 +35,7 @@ class AsyncCallJob:
             return None
         return deserializer(rows[0][0])
 
-    def fetch_many(self, _: Type[T], deserializer: Callable[[Any], T]) -> List[T]:
+    def fetch_many(self, _: Type[T], deserializer: Callable[[Any], T]) -> Union[List[T], None]:
         if deserializer is None:
             raise ValueError("cannot fetch_all without any deserializer")
         try:

@@ -41,7 +41,7 @@ class AsyncAssetJob(AsyncAwaitable):
         while True:
             status = self._conn.get_query_status(self._query_id)
             if status == QueryStatus.SUCCESS:
-                if self._queue is not None and self._asset != None:
+                if self._queue is not None and self._asset is not None:
                     self._queue.put(self._asset)
                 return
             elif self._conn.is_an_error(status):
@@ -55,6 +55,6 @@ class AsyncAssetJob(AsyncAwaitable):
             # Sleep for a short duration before checking again, to not hog the CPU
             time.sleep(0.1)
 
-    def cancel(self) -> bool:
+    def cancel(self) -> None:
         self._cur.abort_query(self._query_id)
         self._cur.close()
