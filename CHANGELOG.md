@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.2](https://github.com/kjerstit/pyflake-client/compare/v0.12.1...v0.12.2) (2024-11-06)
+
+
+### Bug Fixes
+
+* some type errors ([6c60a8f](https://github.com/kjerstit/pyflake-client/commit/6c60a8f7d8817aa3bb300aeec5e8ec8e63e1ddff))
+
 ## [0.12.1](https://github.com/kjerstit/pyflake-client/compare/v0.12.0...v0.12.1) (2024-06-19)
 
 
