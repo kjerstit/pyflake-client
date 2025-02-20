@@ -30,9 +30,10 @@ def flake() -> Generator[PyflakeClient, None, None]:
     conn: SnowflakeConnection = snowflake.connector.connect(
         account=os.getenv("SNOWFLAKE_ACCOUNT"),
         user=os.getenv("SNOWFLAKE_UID"),
-        password=os.getenv("SNOWFLAKE_PWD"),
+        #password=os.getenv("SNOWFLAKE_PWD"),
         role=os.getenv("SNOWFLAKE_ROLE"),
         warehouse=os.getenv("SNOWFLAKE_WH"),
+        authenticator="externalbrowser",
         autocommit=True,
     )
 
