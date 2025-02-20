@@ -26,13 +26,17 @@ def test_describe_grant_for_non_existing_database_role(
 ):
     ### Arrange ###
     sys_admin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin)
+    database = DatabaseAsset(
+        f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin
+    )
     try:
         flake.register_asset_async(database, assets_queue).wait()
         ### Act ###
         grants = flake.describe_async(
             describable=RoleGrantDescribable(
-                principal=DatabaseRoleDescribable(name="NON_EXISTING_DATABASE_ROLE", db_name=database.db_name)
+                principal=DatabaseRoleDescribable(
+                    name="NON_EXISTING_DATABASE_ROLE", db_name=database.db_name
+                )
             )
         ).deserialize_many(RoleGrantEntity)
 
@@ -50,8 +54,12 @@ def test_database_role_database_grant(
     ### Arrange ###
     user_admin = RoleAsset("USERADMIN")
     sys_admin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin)
-    db_role = DatabaseRoleAsset("PYFLAKE_CLIENT_TEST_DB_ROLE", database.db_name, comment, user_admin)
+    database = DatabaseAsset(
+        f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin
+    )
+    db_role = DatabaseRoleAsset(
+        "PYFLAKE_CLIENT_TEST_DB_ROLE", database.db_name, comment, user_admin
+    )
     grant = GrantAction(
         db_role,
         DatabaseGrant(database_name=database.db_name),
@@ -66,7 +74,9 @@ def test_database_role_database_grant(
         ### Act ###
         grants = flake.describe_async(
             describable=RoleGrantDescribable(
-                principal=DatabaseRoleDescribable(name=db_role.name, db_name=database.db_name)
+                principal=DatabaseRoleDescribable(
+                    name=db_role.name, db_name=database.db_name
+                )
             )
         ).deserialize_many(RoleGrantEntity)
 
@@ -74,15 +84,30 @@ def test_database_role_database_grant(
         assert grants is not None
         assert len(grants) == 3
 
-        usg = next((r for r in grants if r.privilege == Privilege.USAGE and r.granted_on == "DATABASE"), None)
+        usg = next(
+            (
+                r
+                for r in grants
+                if r.privilege == Privilege.USAGE and r.granted_on == "DATABASE"
+            ),
+            None,
+        )
         assert usg is not None
-        assert usg.granted_by == ""  # Implisit usage grant on databases for database roles
+        assert (
+            usg.granted_by == ""
+        )  # Implisit usage grant on databases for database roles
         assert usg.grantee_identifier == db_role.name
         assert usg.grantee_type == "DATABASE_ROLE"
         assert usg.granted_identifier == database.db_name
 
         cdr = next(
-            (r for r in grants if r.privilege == Privilege.CREATE_DATABASE_ROLE and r.granted_on == "DATABASE"), None
+            (
+                r
+                for r in grants
+                if r.privilege == Privilege.CREATE_DATABASE_ROLE
+                and r.granted_on == "DATABASE"
+            ),
+            None,
         )
         assert cdr is not None
         assert cdr.granted_on == "DATABASE"
@@ -91,7 +116,14 @@ def test_database_role_database_grant(
         assert cdr.grantee_type == "DATABASE_ROLE"
         assert cdr.granted_identifier == database.db_name
 
-        cs = next((r for r in grants if r.privilege == Privilege.CREATE_SCHEMA and r.granted_on == "DATABASE"), None)
+        cs = next(
+            (
+                r
+                for r in grants
+                if r.privilege == Privilege.CREATE_SCHEMA and r.granted_on == "DATABASE"
+            ),
+            None,
+        )
         assert cs is not None
         assert cs.granted_on == "DATABASE"
         assert cs.granted_by == "SYSADMIN"
@@ -103,17 +135,29 @@ def test_database_role_database_grant(
         flake.delete_assets(assets_queue)
 
 
-def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str):
+def test_database_role_schema_grant(
+    flake: PyflakeClient, assets_queue: queue.LifoQueue, rand_str: str, comment: str
+):
     ### Arrange ###
     user_admin = RoleAsset("USERADMIN")
     sys_admin = RoleAsset("SYSADMIN")
-    database = DatabaseAsset(f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin)
+    database = DatabaseAsset(
+        f"PYFLAKE_CLIENT_TEST_DB_{rand_str}", comment, owner=sys_admin
+    )
     schema = SchemaAsset(database.db_name, "TEST_SCHEMA", comment, sys_admin)
-    db_role = DatabaseRoleAsset("PYFLAKE_CLIENT_TEST_DB_ROLE", database.db_name, comment, user_admin)
+    db_role = DatabaseRoleAsset(
+        "PYFLAKE_CLIENT_TEST_DB_ROLE", database.db_name, comment, user_admin
+    )
     grant = GrantAction(
         db_role,
         SchemaGrant(database_name=database.db_name, schema_name=schema.schema_name),
-        [Privilege.USAGE, Privilege.CREATE_TABLE, Privilege.CREATE_MODEL, Privilege.CREATE_SF_ML_ANOMALY_DETECTION],
+        [
+            Privilege.USAGE,
+            Privilege.CREATE_TABLE,
+            Privilege.CREATE_MODEL,
+            Privilege.CREATE_SF_ML_ANOMALY_DETECTION,
+            Privilege.CREATE_CORTEX_SEARCH_SERVICE,
+        ],
     )
 
     try:
@@ -126,36 +170,54 @@ def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.Li
         ### Act ###
         grants = flake.describe_async(
             describable=RoleGrantDescribable(
-                principal=DatabaseRoleDescribable(name=db_role.name, db_name=database.db_name)
+                principal=DatabaseRoleDescribable(
+                    name=db_role.name, db_name=database.db_name
+                )
             )
         ).deserialize_many(RoleGrantEntity)
 
         ### Assert ###
         assert grants is not None
-        assert len(grants) == 5
+        assert len(grants) == 6
 
-        usg = next((r for r in grants if r.privilege == Privilege.USAGE and r.granted_on == "DATABASE"), None)
+        usg = next(
+            (
+                r
+                for r in grants
+                if r.privilege == Privilege.USAGE and r.granted_on == "DATABASE"
+            ),
+            None,
+        )
         assert usg is not None
-        assert usg.granted_by == ""  # Implisit usage grant on databases for database roles
+        assert (
+            usg.granted_by == ""
+        )  # Implisit usage grant on databases for database roles
         assert usg.grantee_identifier == db_role.name
         assert usg.grantee_type == "DATABASE_ROLE"
         assert usg.granted_identifier == database.db_name
 
-        susg = next((r for r in grants if r.privilege == Privilege.USAGE and r.granted_on == "SCHEMA"), None)
+        susg = next(
+            (
+                r
+                for r in grants
+                if r.privilege == Privilege.USAGE and r.granted_on == "SCHEMA"
+            ),
+            None,
+        )
         assert susg is not None
         assert susg.granted_by == "SYSADMIN"
         assert susg.grantee_identifier == db_role.name
         assert susg.grantee_type == "DATABASE_ROLE"
         assert susg.granted_identifier == f"{database.db_name}.{schema.schema_name}"
 
-        ct = next((r for r in grants if r.privilege == Privilege.CREATE_TABLE and r.granted_on == "SCHEMA"), None)
-        assert ct is not None
-        assert ct.granted_by == "SYSADMIN"
-        assert ct.grantee_identifier == db_role.name
-        assert ct.grantee_type == "DATABASE_ROLE"
-        assert ct.granted_identifier == f"{database.db_name}.{schema.schema_name}"
-
-        cm = next((r for r in grants if r.privilege == Privilege.CREATE_MODEL and r.granted_on == "SCHEMA"), None)
+        ct = next(
+            (
+                r
+                for r in grants
+                if r.privilege == Privilege.CREATE_TABLE and r.granted_on == "SCHEMA"
+            ),
+            None,
+        )
         assert ct is not None
         assert ct.granted_by == "SYSADMIN"
         assert ct.grantee_identifier == db_role.name
@@ -166,15 +228,45 @@ def test_database_role_schema_grant(flake: PyflakeClient, assets_queue: queue.Li
             (
                 r
                 for r in grants
-                if r.privilege == Privilege.CREATE_SF_ML_ANOMALY_DETECTION and r.granted_on == "SCHEMA"
+                if r.privilege == Privilege.CREATE_MODEL and r.granted_on == "SCHEMA"
             ),
             None,
         )
-        assert ct is not None
-        assert ct.granted_by == "SYSADMIN"
-        assert ct.grantee_identifier == db_role.name
-        assert ct.grantee_type == "DATABASE_ROLE"
-        assert ct.granted_identifier == f"{database.db_name}.{schema.schema_name}"
+        assert cm is not None
+        assert cm.granted_by == "SYSADMIN"
+        assert cm.grantee_identifier == db_role.name
+        assert cm.grantee_type == "DATABASE_ROLE"
+        assert cm.granted_identifier == f"{database.db_name}.{schema.schema_name}"
+
+        mlad = next(
+            (
+                r
+                for r in grants
+                if r.privilege == Privilege.CREATE_SF_ML_ANOMALY_DETECTION
+                and r.granted_on == "SCHEMA"
+            ),
+            None,
+        )
+        assert mlad is not None
+        assert mlad.granted_by == "SYSADMIN"
+        assert mlad.grantee_identifier == db_role.name
+        assert mlad.grantee_type == "DATABASE_ROLE"
+        assert mlad.granted_identifier == f"{database.db_name}.{schema.schema_name}"
+
+        cortex = next(
+            (
+                r
+                for r in grants
+                if r.privilege == Privilege.CREATE_CORTEX_SEARCH_SERVICE
+                and r.granted_on == "SCHEMA"
+            ),
+            None,
+        )
+        assert cortex is not None
+        assert cortex.granted_by == "SYSADMIN"
+        assert cortex.grantee_identifier == db_role.name
+        assert cortex.grantee_type == "DATABASE_ROLE"
+        assert cortex.granted_identifier == f"{database.db_name}.{schema.schema_name}"
     finally:
         ### Cleanup ###
         flake.delete_assets(assets_queue)
