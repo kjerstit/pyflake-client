@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.3](https://github.com/kjerstit/pyflake-client/compare/v0.12.2...v0.12.3) (2025-02-20)
+
+
+### Features
+
+* added SF privileges available ([f9da2aa](https://github.com/kjerstit/pyflake-client/commit/f9da2aa1bca2b196e4f57e63084735f176e110ef))
+
 ## [0.12.2](https://github.com/kjerstit/pyflake-client/compare/v0.12.1...v0.12.2) (2024-11-06)
 
 
